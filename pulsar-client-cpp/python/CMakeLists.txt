@@ -17,7 +17,7 @@
 # under the License.
 #
 
-INCLUDE_DIRECTORIES("${Boost_INCLUDE_DIRS}" "${PYTHON_INCLUDE_DIRS}")
+INCLUDE_DIRECTORIES("${Boost_INCLUDE_DIRS}" "${Python_INCLUDE_DIRS}")
 
 ADD_LIBRARY(_pulsar SHARED src/pulsar.cc src/producer.cc src/consumer.cc
                             src/config.cc src/enums.cc src/client.cc
@@ -48,17 +48,26 @@ if (NOT DEFINED ${Boost_PYTHON38-MT_LIBRARY})
   set(Boost_PYTHON38-MT_LIBRARY ${Boost_PYTHON38_LIBRARY})
 endif()
 
+if (NOT DEFINED ${Boost_PYTHON39-MT_LIBRARY})
+  set(Boost_PYTHON39-MT_LIBRARY ${Boost_PYTHON39_LIBRARY})
+endif()
+
 # Try all possible boost-python variable namings
 set(PYTHON_WRAPPER_LIBS ${Boost_PYTHON_LIBRARY} ${Boost_PYTHON3_LIBRARY}
                         ${Boost_PYTHON27-MT_LIBRARY} ${Boost_PYTHON37-MT_LIBRARY}
                         ${Boost_PYTHON34_LIBRARY} ${Boost_PYTHON35_LIBRARY}
-                        ${Boost_PYTHON36_LIBRARY} ${Boost_PYTHON38_LIBRARY})
+                        ${Boost_PYTHON36_LIBRARY} ${Boost_PYTHON38_LIBRARY} ${Boost_PYTHON39_LIBRARY})
 
 if (APPLE)
-    set(PYTHON_WRAPPER_LIBS ${PYTHON_WRAPPER_LIBS}
-                         ${Boost_PYTHON27-MT_LIBRARY_RELEASE}
-                         ${Boost_PYTHON37-MT_LIBRARY_RELEASE}
-                         ${Boost_PYTHON38-MT_LIBRARY_RELEASE})
+    if (Python_VERSION MATCHES "^3.+$")
+        set(PYTHON_WRAPPER_LIBS ${PYTHON_WRAPPER_LIBS}
+            ${Boost_PYTHON37-MT_LIBRARY_RELEASE}
+            ${Boost_PYTHON38-MT_LIBRARY_RELEASE}
+            ${Boost_PYTHON39-MT_LIBRARY_RELEASE})
+    else ()
+        # Regular boost_python
+        set(PYTHON_WRAPPER_LIBS ${PYTHON_WRAPPER_LIBS} ${Boost_PYTHON27-MT_LIBRARY_RELEASE})
+    endif ()
 
     if (LINK_STATIC)
         # When linking statically on MacOS, include also libicu since it's now required by boost::regex
